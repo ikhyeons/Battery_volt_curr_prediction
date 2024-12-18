@@ -25,7 +25,7 @@ num_experts = 12
 feature_size = 10
 sequence_length = 4
 
-saved_model_file = "AttMoE_3e_4ss"
+saved_model_file = "AttMoE_3e_4ss_volt"
 result_type = "volt"
 # setting #
 

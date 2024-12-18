@@ -20,8 +20,8 @@ input_size = 10
 hidden_size = 256
 num_layers = 2
 bidirectional = True
-weight_decay = 0.0
 output_size = 1
+weight_decay = 0.0
 sequence_length = 4
 
 result_type = "volt"
@@ -50,7 +50,7 @@ processed_data = []
 # get files
 for file_path in filePaths:
     print(f"Read on file: {file_path}")
-    processed_data.append(pd.read_csv(f"../postProcess/11column/{file_path}.csv"))
+    processed_data.append(pd.read_csv(f"../1PostProcess/11column/{file_path}.csv"))
 
 train_dataset = CustomDataset(processed_data, result_type, sequence_length)
 print(train_dataset.__len__())
@@ -78,4 +78,4 @@ for epoch in range(EPOCH):
     epoch_loss = running_loss / len(train_loader)
     print(f'Loss: {epoch_loss:.8f}')
 
-torch.save(model.state_dict(), f'savedModels/11c/BiLSTM_{EPOCH}e_4ss_{result_type}.pth')
+torch.save(model.state_dict(), f'savedModels/BiLSTM_{EPOCH}e_4ss_{result_type}.pth')
