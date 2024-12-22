@@ -1,8 +1,8 @@
 import pandas as pd
-from Tr_model import Transformer
+from Battery.Models.AttMoe_model import model
 from torch.utils.data import DataLoader
 import torch
-from Battery.CustomDataset import CustomDataset
+from CustomDataset import CustomDataset
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,46 +10,41 @@ from tqdm import tqdm
 from Battery.utils import get_mae, get_rmse, get_r2, get_max_err
 
 torch.set_printoptions(precision=16)
-test_data = pd.read_csv("../1PostProcess/11column/test_data.csv")
-test_data = test_data[:-20000]
+test_data = pd.read_csv("../PostProcess/11column/test_data.csv")
+test_data = test_data[75000:-75000]
+
+# model Setting
+device = 'cpu'
+result_type = "volt"
+weight_decay = 0.0
+sequence_length = 4
+# model setting
 
 processed_data = []
 processed_data.append(test_data)
 
-# setting #
-device = 'cuda'
-model_dim = 128
-num_heads = 8
-input_dim = 10
-num_layers = 6
-weight_decay = 0.0
-sequence_length = 4
+saved_model_file = 'AttMoE_10e_4ss_volt'
 
-saved_model_file = "Tr_3e_4ss"
-result_type = "volt"
-# setting #
-
-model = Transformer(input_dim, model_dim, num_heads, num_layers)
-model.load_state_dict(torch.load(f'savedModels/11c/{saved_model_file}.pth', weights_only=True))
+model.load_state_dict(torch.load(f'../Models/savedParams/{saved_model_file}.pth', weights_only=True,
+                                 map_location=torch.device(device)))
 model = model.to(device)
 
 train_dataset = CustomDataset(processed_data, result_type, sequence_length)
 train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
-y_pred, y_true = train_dataset.get_test_init()
+y_true = train_dataset.get_y_true()
+y_pred = []
 
 print(train_dataset.__len__())
 
 for i, data in enumerate(tqdm(train_loader, desc="Processing batches", unit="batch")):
-    if i < sequence_length:
-        continue
-    X = data["data"].float()
-
-    last_pred_volt = y_pred[-1]
-    X[-1, -1, -1] = last_pred_volt
-
+    current_sequence = data["data"].float()
+    for sequence in range(1, min(len(y_pred) + 1, 5)):  # y_pred 길이와 4 중 작은 값까지만 순회
+        current_sequence[-1, -sequence, -1] = y_pred[-sequence]
+    X = current_sequence
     X = X.to(device)
-    y_true.append(data['y'].float().item())
-    y_pred.append(model(X).item())
+
+    pred = model(X).item()
+    y_pred.append(pred)
 
 y_true = np.array(y_true) if isinstance(y_true, list) else y_true
 y_pred = [pred.detach().cpu().numpy() if isinstance(pred, torch.Tensor) else np.array(pred) for pred in y_pred]
@@ -66,7 +61,6 @@ print(f"RMSE: {rmse}")
 print(f"MAE: {mae}")
 print(f"Max Error: {max_err}")
 print(f"R² Coefficient: {r2}")
-
 
 y_true = np.array(y_true).flatten()
 y_pred = np.array(y_pred).flatten()

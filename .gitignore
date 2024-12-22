@@ -1,4 +1,4 @@
-*/savedModels/*
+Models/savedParams/*
 secrets.py
-1PostProcess/11column/*
-/__pycache__
+PostProcess/11column/*
+**/__pycache__

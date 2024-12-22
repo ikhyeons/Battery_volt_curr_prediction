@@ -19,35 +19,6 @@ class PositionalEncoding(nn.Module):
         return x + self.pe[:, :seq_len].to(x.device)
 
 
-class MoeTr(nn.Module):
-    def __init__(self, input_dim, model_dim, num_heads, num_layers, output_dim=1, num_experts=8, max_seq_len=16):
-        super(MoeTr, self).__init__()
-        self.model_dim = model_dim
-        self.embedding = nn.Linear(input_dim, model_dim)
-        self.positional_encoding = PositionalEncoding(d_model=model_dim, max_len=max_seq_len)
-        self.transformer_encoder = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(d_model=model_dim, nhead=num_heads, batch_first=True),
-            num_layers=num_layers,
-        )
-        experts = nn.Linear(model_dim, model_dim)
-        self.moe = MoE(dim=model_dim,
-                       num_experts=num_experts,
-                       experts=experts)
-        self.linear = nn.Linear(self.model_dim, 1)
-
-    def forward(self, x):
-        output = self.embedding(x)
-        output = self.positional_encoding(output)
-        output = self.transformer_encoder(output)
-        output = output[:, -1:, :]
-        output, _ = self.moe(output)
-        output = self.linear(output)
-        output = output.squeeze(-1)
-        output = output.squeeze(-1)
-
-        return output
-
-
 class Transformer(nn.Module):
     def __init__(self, input_dim, model_dim, num_heads, num_layers, output_dim=1):
         super(Transformer, self).__init__()
@@ -65,3 +36,13 @@ class Transformer(nn.Module):
         output = self.fc_out(x)
         output = output.squeeze(-1)  # (16, 1) -> (16)
         return output
+
+
+# model Setting #
+input_dim = 10
+model_dim = 128
+num_heads = 4
+num_layers = 6
+# model setting
+
+model = Transformer(input_dim, model_dim, num_heads, num_layers)

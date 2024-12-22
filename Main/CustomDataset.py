@@ -1,10 +1,8 @@
-import pandas as pd
 from torch.utils.data import Dataset
 import torch
 from Battery.secrets import columns_except_volt, columns_except_current
 from Battery.secrets import volt_result_set, current_result_set
 from Battery.secrets import volt_column, curr_column
-import numpy as np
 
 
 device = (
@@ -59,10 +57,9 @@ class CustomDataset(Dataset):
             'y': y
         }
 
-    def get_test_init(self):
-        y_pred = []
+    def get_y_true(self):
         y_true = []
-        for i in range(0, self.sequence_length):
-            y_pred.append(self.__getitem__(i)['y'])
+
+        for i in range(0, self.__len__()):
             y_true.append(self.__getitem__(i)['y'])
-        return y_pred, y_true
+        return y_true

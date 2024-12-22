@@ -21,3 +21,13 @@ class BiLSTM(nn.Module):
         # Decode the hidden state of the last time step
         out = self.fc(out[:, -1, :])
         return out
+
+
+# model Setting #
+input_size = 10
+hidden_size = 128
+num_layers = 2
+output_size = 1
+# model setting
+
+model = BiLSTM(input_size, hidden_size, num_layers, output_size)

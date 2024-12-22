@@ -1,6 +1,5 @@
 from common_utils import print_model_parameters
-from Battery.AttMoe import AttMoe_model
-from Battery.Bi_LSTM.Bi_LSTM_model import BiLSTM
+from Battery.Models.Bi_LSTM_model import BiLSTM
 
 # AttMoE
 # nhead = 4
