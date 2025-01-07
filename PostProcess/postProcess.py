@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from Battery.secrets import col_list, col_list_without_volt, columns_to_normalize, drop_column
 from Battery.secrets import volt_column, curr_column, press_column
-
+from Battery.secrets import postProcessFile
 def data_post_process(df, outputname):
     result = df.copy()
     for dc in drop_column:
@@ -90,6 +90,6 @@ def create_post_processed_data(file_name):
 
 # 전처리할 파일 이름
 # 전처리할 파일은 2rawData폴더 안에 있어야 함
-fileName = "s_ikhyeon_nor"
+fileName = postProcessFile
 create_post_processed_data(fileName)
 

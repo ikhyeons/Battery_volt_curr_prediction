@@ -20,6 +20,7 @@ class AttMoE(nn.Module):
     def __init__(self, feature_size, hidden_dim, nhead=4, dropout_att=0.,
                  num_experts=8):
         super(AttMoE, self).__init__()
+        self.model_name = 'AttMoE'
         self.feature_size, self.hidden_dim = feature_size, hidden_dim
         self.cell = Attention(feature_size=feature_size, hidden_dim=hidden_dim, nhead=nhead, dropout=dropout_att)
         self.linear = nn.Linear(hidden_dim, 1)
@@ -29,7 +30,6 @@ class AttMoE(nn.Module):
         self.moe = MoE(dim=hidden_dim,
                        num_experts=num_experts,
                        experts=experts)
-        self.moe = self.moe
 
     def forward(self, x):
         out = self.cell(x)

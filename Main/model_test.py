@@ -1,5 +1,5 @@
 import pandas as pd
-from Battery.Models.AttMoe_model import model
+from Battery.Models.Tr_model import model
 from torch.utils.data import DataLoader
 import torch
 from CustomDataset import CustomDataset
@@ -10,20 +10,19 @@ from tqdm import tqdm
 from Battery.utils import get_mae, get_rmse, get_r2, get_max_err
 
 torch.set_printoptions(precision=16)
-test_data = pd.read_csv("../PostProcess/11column/test_data.csv")
-test_data = test_data[75000:-75000]
+test_data = pd.read_csv("../PostProcess/11column4sample/test_data.csv")
+test_data = test_data[:]
 
 # model Setting
-device = 'cpu'
-result_type = "volt"
+device = 'cuda'
+result_type = "current"
 weight_decay = 0.0
 sequence_length = 4
 # model setting
 
-processed_data = []
-processed_data.append(test_data)
+processed_data = [test_data]
 
-saved_model_file = 'AttMoE_10e_4ss_volt'
+saved_model_file = 'Tr_10e_4sl_current'
 
 model.load_state_dict(torch.load(f'../Models/savedParams/{saved_model_file}.pth', weights_only=True,
                                  map_location=torch.device(device)))

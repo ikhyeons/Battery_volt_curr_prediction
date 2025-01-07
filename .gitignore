@@ -2,3 +2,4 @@ Models/savedParams/*
 secrets.py
 PostProcess/11column/*
 **/__pycache__
+PostProcess/11column4sample/*

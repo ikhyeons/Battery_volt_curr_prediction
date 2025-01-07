@@ -15,8 +15,8 @@ seed = 0
 # hyper params Setting #
 
 # model Setting
-device = 'cpu'
-result_type = "volt"
+device = 'cuda'
+result_type = "current"
 weight_decay = 0.0
 sequence_length = 4
 # model setting
@@ -27,6 +27,8 @@ filePaths = train_file_path_list
 setup_seed(seed)
 # get model
 model = model.to(device)
+model_name = model.model_name
+
 
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
@@ -37,7 +39,7 @@ processed_data = []
 # get files
 for file_path in filePaths:
     print(f"Read on file: {file_path}")
-    processed_data.append(pd.read_csv(f"../PostProcess/11column/{file_path}.csv"))
+    processed_data.append(pd.read_csv(f"../PostProcess/11column4sample/{file_path}.csv"))
 
 train_dataset = CustomDataset(processed_data, result_type, sequence_length)
 print(train_dataset.__len__())
@@ -65,4 +67,4 @@ for epoch in range(EPOCH):
     epoch_loss = running_loss / len(train_loader)
     print(f'Loss: {epoch_loss:.8f}')
 
-torch.save(model.state_dict(), f'../Models/savedParams/Tr_{EPOCH}e_4ss_{result_type}.pth')
+torch.save(model.state_dict(), f'../Models/savedParams/{model_name}_{EPOCH}e_{sequence_length}sl_{result_type}.pth')

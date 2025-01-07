@@ -5,6 +5,7 @@ import torch.nn as nn
 class BiLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, output_size, bidirectional=True):
         super(BiLSTM, self).__init__()
+        self.model_name = 'BiLSTM'
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = bidirectional
@@ -20,6 +21,7 @@ class BiLSTM(nn.Module):
 
         # Decode the hidden state of the last time step
         out = self.fc(out[:, -1, :])
+        out = out.squeeze(-1)  # (16, 1) -> (16)
         return out
 
 

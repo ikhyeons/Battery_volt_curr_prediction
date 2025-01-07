@@ -4,9 +4,31 @@ from mixture_of_experts import MoE
 import math
 
 
+class TrMoE(nn.Module):
+    def __init__(self, input_dim, tr_model_dim, num_heads, num_layers, moe_model_dim, num_experts):
+        super(TrMoE, self).__init__()
+        self.model_name = 'TrMoE'
+        experts = nn.Linear(tr_model_dim, moe_model_dim)
+        self.tr = Transformer(input_dim, tr_model_dim, num_heads, num_layers)
+        self.moe = MoE(dim=moe_model_dim,
+                       num_experts=num_experts,
+                       experts=experts)
+        self.linear1 = nn.Linear(moe_model_dim, 1)
+        self.linear2 = nn.Linear(4, 1)
+
+    def forward(self, x):
+        x = self.tr(x)
+        x, _ = self.moe(x)
+        x = self.linear1(x)
+        x = x.squeeze(-1)
+        x = self.linear2(x)
+        out = x.squeeze(-1)
+        return out
+
+
+
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=16):
-
         super(PositionalEncoding, self).__init__()
         self.pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
@@ -21,30 +43,32 @@ class PositionalEncoding(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, input_dim, model_dim, num_heads, num_layers, output_dim=1):
+    def __init__(self, input_dim, model_dim, num_heads, num_layers):
         super(Transformer, self).__init__()
-        self.model_name = 'Tr'
         self.embedding = nn.Linear(input_dim, model_dim)
         self.transformer_encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=model_dim, nhead=num_heads, batch_first=True),
             num_layers=num_layers,
         )
-        self.fc_out = nn.Linear(model_dim, output_dim)
 
     def forward(self, x):
         x = self.embedding(x)
-        x = self.transformer_encoder(x)
-        x = x[:, -1, :]  # 마지막 시점의 출력을 사용
-        output = self.fc_out(x)
-        output = output.squeeze(-1)  # (16, 1) -> (16)
-        return output
+        out = self.transformer_encoder(x)
+        return out
 
 
 # model Setting #
+# tr
 input_dim = 10
-model_dim = 256
 num_heads = 4
-num_layers = 2
+num_layers = 4
+tr_model_dim = 128
+# tr
+# moe
+moe_model_dim = 128
+num_experts = 12
+# moe
 # model setting
 
-model = Transformer(input_dim, model_dim, num_heads, num_layers)
+
+model = TrMoE(input_dim, tr_model_dim, num_heads, num_layers, moe_model_dim, num_experts)
